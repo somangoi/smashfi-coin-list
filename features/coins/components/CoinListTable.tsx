@@ -8,6 +8,7 @@ import FavoriteButton from "@/features/favorites/components/FavoriteButton";
 import TabNavigation from "@/features/favorites/components/TabNavigation";
 import { useFavoriteStore } from "@/features/favorites/stores/useFavoriteStore";
 import SearchBar from "@/shared/components/SearchBar";
+import CoinListTableSkeleton from "./CoinListTableSkeleton";
 
 type SortKey = "price" | "change" | "volume" | "marketCap";
 type SortDirection = "asc" | "desc";
@@ -94,8 +95,10 @@ export default function CoinListTable() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-20">
-        <p className="text-lg">Loading...</p>
+      <div>
+        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search by name or symbol..." />
+        <CoinListTableSkeleton />
       </div>
     );
   }
