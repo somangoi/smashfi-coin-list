@@ -9,9 +9,14 @@ import TabNavigation from "@/features/favorites/components/TabNavigation";
 import { useFavoriteStore } from "@/features/favorites/stores/useFavoriteStore";
 import SearchBar from "@/shared/components/SearchBar";
 
+type SortKey = 'price' | 'change' | 'volume' | 'marketCap';
+type SortDirection = 'asc' | 'desc';
+
 export default function CoinListTable() {
   const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const { favoriteIds } = useFavoriteStore();
 
   const {
@@ -22,6 +27,29 @@ export default function CoinListTable() {
     queryKey: ["coins"],
     queryFn: getCoins,
   });
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDirection('desc');
+    }
+  };
+
+  const SortableHeader = ({ sortKeyValue, children, align = 'right' }: { sortKeyValue: SortKey; children: React.ReactNode; align?: 'left' | 'right' }) => (
+    <th
+      className={`px-4 py-3 text-${align} font-semibold cursor-pointer hover:bg-gray-100 select-none`}
+      onClick={() => handleSort(sortKeyValue)}
+    >
+      <div className={`flex items-center gap-1 ${align === 'right' ? 'justify-end' : 'justify-start'}`}>
+        {children}
+        {sortKey === sortKeyValue && (
+          <span className="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+        )}
+      </div>
+    </th>
+  );
 
   const sortedCoins = useMemo(() => {
     if (!coins) return [];
@@ -41,9 +69,36 @@ export default function CoinListTable() {
       );
     }
 
-    // 정렬 (Price 기준 내림차순)
-    return filtered.sort((a, b) => b.current_price - a.current_price);
-  }, [coins, activeTab, favoriteIds, searchQuery]);
+    // 동적 정렬
+    return filtered.sort((a, b) => {
+      let aValue: number;
+      let bValue: number;
+
+      // sortKey가 null이면 기본값으로 price 내림차순 적용
+      const currentSortKey = sortKey ?? 'price';
+
+      switch (currentSortKey) {
+        case 'price':
+          aValue = a.current_price;
+          bValue = b.current_price;
+          break;
+        case 'change':
+          aValue = a.price_change_percentage_24h ?? 0;
+          bValue = b.price_change_percentage_24h ?? 0;
+          break;
+        case 'volume':
+          aValue = a.total_volume;
+          bValue = b.total_volume;
+          break;
+        case 'marketCap':
+          aValue = a.market_cap;
+          bValue = b.market_cap;
+          break;
+      }
+
+      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+    });
+  }, [coins, activeTab, favoriteIds, searchQuery, sortKey, sortDirection]);
 
   if (isLoading) {
     return (
@@ -76,10 +131,10 @@ export default function CoinListTable() {
             <th className="px-4 py-3 text-left font-semibold"></th>
             <th className="px-4 py-3 text-left font-semibold">Name</th>
             <th className="px-4 py-3 text-left font-semibold">Symbol</th>
-            <th className="px-4 py-3 text-right font-semibold">Price</th>
-            <th className="px-4 py-3 text-right font-semibold">24h Change</th>
-            <th className="px-4 py-3 text-right font-semibold">Volume (24h)</th>
-            <th className="px-4 py-3 text-right font-semibold">Market Cap</th>
+            <SortableHeader sortKeyValue="price">Price</SortableHeader>
+            <SortableHeader sortKeyValue="change">24h Change</SortableHeader>
+            <SortableHeader sortKeyValue="volume">Volume (24h)</SortableHeader>
+            <SortableHeader sortKeyValue="marketCap">Market Cap</SortableHeader>
           </tr>
         </thead>
         <tbody>
