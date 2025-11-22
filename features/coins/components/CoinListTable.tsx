@@ -7,9 +7,11 @@ import { getCoins } from "../api/getCoins";
 import FavoriteButton from "@/features/favorites/components/FavoriteButton";
 import TabNavigation from "@/features/favorites/components/TabNavigation";
 import { useFavoriteStore } from "@/features/favorites/stores/useFavoriteStore";
+import SearchBar from "@/shared/components/SearchBar";
 
 export default function CoinListTable() {
   const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const { favoriteIds } = useFavoriteStore();
 
   const {
@@ -23,14 +25,25 @@ export default function CoinListTable() {
 
   const sortedCoins = useMemo(() => {
     if (!coins) return [];
-    const sorted = [...coins].sort((a, b) => b.current_price - a.current_price);
+    let filtered = [...coins];
 
+    // 탭 필터링
     if (activeTab === 'favorites') {
-      return sorted.filter(coin => favoriteIds.includes(coin.id));
+      filtered = filtered.filter(coin => favoriteIds.includes(coin.id));
     }
 
-    return sorted;
-  }, [coins, activeTab, favoriteIds]);
+    // 검색 필터링
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(coin =>
+        coin.name.toLowerCase().includes(query) ||
+        coin.symbol.toLowerCase().includes(query)
+      );
+    }
+
+    // 정렬 (Price 기준 내림차순)
+    return filtered.sort((a, b) => b.current_price - a.current_price);
+  }, [coins, activeTab, favoriteIds, searchQuery]);
 
   if (isLoading) {
     return (
@@ -51,6 +64,11 @@ export default function CoinListTable() {
   return (
     <div>
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <SearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search by name or symbol..."
+      />
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
         <thead>

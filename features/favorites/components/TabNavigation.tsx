@@ -14,7 +14,7 @@ const Button = ({ children, onClick, active }: { children: React.ReactNode; onCl
 
 export default function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
   return (
-    <div className="flex gap-2 mb-2">
+    <div className="flex gap-2 mb-4">
       <Button onClick={() => onTabChange("all")} active={activeTab === "all"}>
         All
       </Button>
