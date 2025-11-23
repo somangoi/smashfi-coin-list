@@ -1,13 +1,12 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import FavoriteButton from "@/features/favorites/components/FavoriteButton";
 import TabNavigation from "@/features/favorites/components/TabNavigation";
 import SearchBar from "@/shared/components/SearchBar";
 import CoinListTableSkeleton from "./CoinListTableSkeleton";
 import { useCoinListParams } from "../model/useCoinListParams";
 import { useCoinQuery } from "../model/useCoinQuery";
+import { useCoinVirtualizer } from "../ui/useCoinVirtualizer";
 import { SortKey } from "../types/sort";
 
 export default function CoinListTable() {
@@ -16,26 +15,7 @@ export default function CoinListTable() {
 
   const { data, coins: filteredCoins, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useCoinQuery(params);
 
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-
-  // 가상 리스트 설정
-  const rowVirtualizer = useVirtualizer({
-    count: hasNextPage ? filteredCoins.length + 1 : filteredCoins.length,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 60, // 각 row의 예상 높이
-    overscan: 10, // 화면 밖 렌더링할 아이템 수
-  });
-
-  // 무한 스크롤: 마지막 아이템이 보이면 다음 페이지 로드
-  useEffect(() => {
-    const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
-
-    if (!lastItem) return;
-
-    if (lastItem.index >= filteredCoins.length - 1 && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [hasNextPage, fetchNextPage, filteredCoins.length, isFetchingNextPage, rowVirtualizer.getVirtualItems()]);
+  const { tableContainerRef, rowVirtualizer } = useCoinVirtualizer(filteredCoins, hasNextPage, isFetchingNextPage, fetchNextPage);
 
   const SortableHeader = ({ sortKeyValue, children, align = "right" }: { sortKeyValue: SortKey; children: React.ReactNode; align?: "left" | "right" }) => (
     <th className={`px-4 py-3 text-${align} font-semibold cursor-pointer hover:bg-gray-100 select-none`} onClick={() => handleSort(sortKeyValue)}>
