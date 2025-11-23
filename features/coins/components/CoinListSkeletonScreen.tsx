@@ -1,28 +1,16 @@
-import TabNavigation from "@/features/favorites/components/TabNavigation";
-import CoinSearchBar from "./CoinSearchBar";
 import Skeleton from "@/shared/components/Skeleton";
-import { useCoinListParams } from "../model/useCoinListParams";
 
-interface CoinListSkeletonScreenProps {
-  params: ReturnType<typeof useCoinListParams>;
-}
-
-export default function CoinListSkeletonScreen({ params }: CoinListSkeletonScreenProps) {
-  const { activeTab, setActiveTab } = params;
-
+export default function CoinListSkeletonScreen() {
   return (
     <div>
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <CoinSearchBar placeholder="Search by name or symbol..." />
       <div className="overflow-x-auto">
         <table className="w-full border-collapse table-fixed">
           <colgroup>
-            <col style={{ width: "40px" }} />
-            <col style={{ width: "300px" }} />
-            <col style={{ width: "130px" }} />
-            <col style={{ width: "130px" }} />
-            <col style={{ width: "150px" }} />
-            <col style={{ width: "150px" }} />
+            <col style={{ width: "5%" }} />
+            <col style={{ width: "25%" }} />
+            <col style={{ width: "17.5%" }} />
+            <col style={{ width: "17.5%" }} />
+            <col style={{ width: "17.5%" }} />
           </colgroup>
           <thead>
             <tr className="border-b">
