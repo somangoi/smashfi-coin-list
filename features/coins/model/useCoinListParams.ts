@@ -9,8 +9,8 @@ export function useCoinListParams() {
   // URL에서 파라미터 읽기
   const activeTab = (searchParams.get("tab") as "all" | "favorites") || "all";
   const searchQuery = searchParams.get("q") || "";
-  const sortParam = searchParams.get("sort");
-  const [sortKey, sortDirection] = sortParam ? (sortParam.split("_") as [SortKey, SortDirection]) : [null, "desc" as SortDirection];
+  const sortParam = searchParams.get("sort") || "price_desc";
+  const [sortKey, sortDirection] = sortParam.split("_") as [SortKey, SortDirection];
 
   // URL 업데이트 헬퍼
   const updateParams = useCallback(
