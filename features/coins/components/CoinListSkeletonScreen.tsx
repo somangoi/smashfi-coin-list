@@ -1,5 +1,5 @@
 import TabNavigation from "@/features/favorites/components/TabNavigation";
-import SearchBar from "@/shared/components/SearchBar";
+import CoinSearchBar from "./CoinSearchBar";
 import Skeleton from "@/shared/components/Skeleton";
 import { useCoinListParams } from "../model/useCoinListParams";
 
@@ -8,12 +8,12 @@ interface CoinListSkeletonScreenProps {
 }
 
 export default function CoinListSkeletonScreen({ params }: CoinListSkeletonScreenProps) {
-  const { activeTab, setActiveTab, searchQuery, setSearchQuery } = params;
+  const { activeTab, setActiveTab } = params;
 
   return (
     <div>
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search by name or symbol..." />
+      <CoinSearchBar placeholder="Search by name or symbol..." />
       <div className="overflow-x-auto">
         <table className="w-full border-collapse table-fixed">
           <colgroup>
