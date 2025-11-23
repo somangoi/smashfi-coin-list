@@ -3,13 +3,12 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Coin } from "../types/coin";
 import { getCoins } from "../api/getCoins";
 import FavoriteButton from "@/features/favorites/components/FavoriteButton";
 import TabNavigation from "@/features/favorites/components/TabNavigation";
-import { useFavoriteStore } from "@/features/favorites/stores/useFavoriteStore";
 import SearchBar from "@/shared/components/SearchBar";
 import CoinListTableSkeleton from "./CoinListTableSkeleton";
+import { useFilteredCoins } from "../lib/useFilteredCoins";
 
 type SortKey = "price" | "change" | "volume" | "marketCap";
 type SortDirection = "asc" | "desc";
@@ -21,7 +20,6 @@ export default function CoinListTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const { favoriteIds } = useFavoriteStore();
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
@@ -50,13 +48,8 @@ export default function CoinListTable() {
     return data.pages.flatMap((page) => page.data);
   }, [data]);
 
-  // 즐겨찾기 탭 필터링 (클라이언트 사이드)
-  const filteredCoins = useMemo(() => {
-    if (activeTab === "favorites") {
-      return allCoins.filter((coin) => favoriteIds.includes(coin.id));
-    }
-    return allCoins;
-  }, [allCoins, activeTab, favoriteIds]);
+  // 즐겨찾기 탭 필터링
+  const filteredCoins = useFilteredCoins(allCoins, activeTab);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
