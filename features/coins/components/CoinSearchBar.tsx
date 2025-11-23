@@ -1,19 +1,20 @@
-"use client";
+'use client';
 
-import { useRef, useEffect } from "react";
+import { useRef } from 'react';
+import { useSearchStore } from '../stores/useSearchStore';
 
-interface SearchBarProps {
-  value: string;
-  onChange: (value: string) => void;
+interface CoinSearchBarProps {
   placeholder?: string;
 }
 
-export default function SearchBar({ value, onChange, placeholder = "Search..." }: SearchBarProps) {
+export default function CoinSearchBar({ placeholder = 'Search...' }: CoinSearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const localSearchQuery = useSearchStore((state) => state.localSearchQuery);
+  const setLocalSearchQuery = useSearchStore((state) => state.setLocalSearchQuery);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cursorPosition = e.target.selectionStart;
-    onChange(e.target.value);
+    setLocalSearchQuery(e.target.value);
 
     // 다음 렌더링 후 커서 위치 복원
     requestAnimationFrame(() => {
@@ -28,7 +29,7 @@ export default function SearchBar({ value, onChange, placeholder = "Search..." }
       <input
         ref={inputRef}
         type="text"
-        value={value}
+        value={localSearchQuery}
         onChange={handleChange}
         placeholder={placeholder}
         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"

@@ -1,18 +1,33 @@
+"use client";
+
+import { useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import TabNavigation from "@/features/favorites/components/TabNavigation";
-import SearchBar from "@/shared/components/SearchBar";
-import { useCoinListParams } from "../model/useCoinListParams";
+import CoinSearchBar from "./CoinSearchBar";
 
-interface CoinListHeaderControlsProps {
-  params: ReturnType<typeof useCoinListParams>;
-}
+export default function CoinListHeaderControls() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-export default function CoinListHeaderControls({ params }: CoinListHeaderControlsProps) {
-  const { activeTab, setActiveTab, searchQuery, setSearchQuery } = params;
+  const activeTab = (searchParams.get("tab") as "all" | "favorites") || "all";
+
+  const setActiveTab = useCallback(
+    (tab: "all" | "favorites") => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (tab === "all") {
+        params.delete("tab");
+      } else {
+        params.set("tab", tab);
+      }
+      router.push(`?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, router]
+  );
 
   return (
     <div>
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search by name or symbol..." />
+      <CoinSearchBar placeholder="Search by name or symbol..." />
     </div>
   );
 }

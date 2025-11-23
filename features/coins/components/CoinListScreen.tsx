@@ -5,7 +5,6 @@ import { useCoinQuery } from "../model/useCoinQuery";
 import { useCoinVirtualizer } from "../ui/useCoinVirtualizer";
 import CoinListSkeletonScreen from "./CoinListSkeletonScreen";
 import CoinListErrorScreen from "./CoinListErrorScreen";
-import CoinListHeaderControls from "./CoinListHeaderControls";
 import CoinListTableContent from "./CoinListTableContent";
 import CoinListFooterMeta from "./CoinListFooterMeta";
 
@@ -18,10 +17,9 @@ export default function CoinListScreen() {
   if (error) return <CoinListErrorScreen />;
 
   return (
-    <div className="h-[85vh] grid grid-rows-[auto_1fr_auto]">
-      <CoinListHeaderControls params={params} />
+    <>
       <CoinListTableContent filteredCoins={filteredCoins} hasNextPage={hasNextPage} tableContainerRef={tableContainerRef} rowVirtualizer={rowVirtualizer} params={params} />
       <CoinListFooterMeta data={data} filteredCoinsLength={filteredCoins.length} isFetchingNextPage={isFetchingNextPage} />
-    </div>
+    </>
   );
 }
