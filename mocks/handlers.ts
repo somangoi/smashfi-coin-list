@@ -24,13 +24,19 @@ export const handlers = [
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const limit = parseInt(url.searchParams.get("limit") || "50", 10);
     const idsParam = url.searchParams.get("ids");
-    const favoriteIds = idsParam ? idsParam.split(",") : []; // 배열로 변환
 
     let filteredCoins: Coin[] = [...mockCoins];
 
     // 즐겨찾기 필터링
-    if (favoriteIds.length > 0) {
-      filteredCoins = filteredCoins.filter((coin) => favoriteIds.includes(coin.id));
+    if (idsParam !== null) {
+      // ids 파라미터가 "__EMPTY__"이면 빈 배열 반환
+      if (idsParam === "__EMPTY__") {
+        filteredCoins = [];
+      } else {
+        // ids 파라미터가 존재하면 해당 id들만 필터링
+        const favoriteIds = idsParam.split(",").filter((id) => id);
+        filteredCoins = filteredCoins.filter((coin) => favoriteIds.includes(coin.id));
+      }
     }
 
     // 1. 검색 필터링 (q 파라미터)

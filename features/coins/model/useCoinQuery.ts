@@ -12,7 +12,9 @@ export function useCoinQuery(params: ReturnType<typeof useCoinListParams>) {
 
   const sortParam = sortKey ? `${sortKey}_${sortDirection}` : undefined;
 
-  const idsParam = activeTab === "favorites" && favoriteIds.length > 0 ? favoriteIds.join(",") : undefined;
+  // 즐겨찾기 탭일 때: favoriteIds가 비어있으면 "__EMPTY__", 있으면 join
+  // All 탭일 때: undefined
+  const idsParam = activeTab === "favorites" ? (favoriteIds.length > 0 ? favoriteIds.join(",") : "__EMPTY__") : undefined;
 
   const query = useInfiniteQuery({
     queryKey: ["coins", searchQuery, sortParam, activeTab, idsParam],
