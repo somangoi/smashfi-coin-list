@@ -18,7 +18,7 @@ export default function CoinListScreen() {
   if (error) return <CoinListErrorScreen />;
 
   return (
-    <div className="h-[85vh] grid grid-rows-[auto,1fr,auto]">
+    <div className="h-[85vh] grid grid-rows-[auto_1fr_auto]">
       <CoinListHeaderControls params={params} />
       <CoinListTableContent filteredCoins={filteredCoins} hasNextPage={hasNextPage} tableContainerRef={tableContainerRef} rowVirtualizer={rowVirtualizer} params={params} />
       <CoinListFooterMeta data={data} filteredCoinsLength={filteredCoins.length} isFetchingNextPage={isFetchingNextPage} />

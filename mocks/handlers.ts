@@ -1,5 +1,5 @@
-import { http, HttpResponse } from 'msw';
-import mockCoins from '@/data/mock_coins.json';
+import { http, HttpResponse } from "msw";
+import mockCoins from "@/data/mock_coins.json";
 
 interface Coin {
   id: string;
@@ -15,52 +15,61 @@ interface Coin {
 
 export const handlers = [
   // GET /api/coins - 검색, 정렬, 페이지네이션 지원
-  http.get('/api/coins', ({ request }) => {
+  http.get("/api/coins", ({ request }) => {
     const url = new URL(request.url);
 
     // 쿼리 파라미터 추출
-    const query = url.searchParams.get('q')?.toLowerCase() || '';
-    const sort = url.searchParams.get('sort') || '';
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = parseInt(url.searchParams.get('limit') || '50', 10);
+    const query = url.searchParams.get("q")?.toLowerCase() || "";
+    const sort = url.searchParams.get("sort") || "";
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "50", 10);
+    const idsParam = url.searchParams.get("ids");
 
     let filteredCoins: Coin[] = [...mockCoins];
+
+    // 즐겨찾기 필터링
+    if (idsParam !== null) {
+      // ids 파라미터가 "__EMPTY__"이면 빈 배열 반환
+      if (idsParam === "__EMPTY__") {
+        filteredCoins = [];
+      } else {
+        // ids 파라미터가 존재하면 해당 id들만 필터링
+        const favoriteIds = idsParam.split(",").filter((id) => id);
+        filteredCoins = filteredCoins.filter((coin) => favoriteIds.includes(coin.id));
+      }
+    }
 
     // 1. 검색 필터링 (q 파라미터)
     // 예: ?q=bit → 이름이나 심볼에 'bit'가 포함된 코인만 반환
     if (query) {
-      filteredCoins = filteredCoins.filter(
-        (coin) =>
-          coin.name.toLowerCase().includes(query) ||
-          coin.symbol.toLowerCase().includes(query)
-      );
+      filteredCoins = filteredCoins.filter((coin) => coin.name.toLowerCase().includes(query) || coin.symbol.toLowerCase().includes(query));
     }
 
     // 2. 정렬 (sort 파라미터)
     // 예: ?sort=price_desc → 가격 내림차순
     // 예: ?sort=volume_asc → 거래량 오름차순
     if (sort) {
-      const [sortKey, sortDirection] = sort.split('_');
+      const [sortKey, sortDirection] = sort.split("_");
 
       filteredCoins.sort((a, b) => {
         let aValue: number;
         let bValue: number;
 
         switch (sortKey) {
-          case 'price':
+          case "price":
             aValue = a.current_price;
             bValue = b.current_price;
             break;
-          case 'change':
+          case "change":
             aValue = a.price_change_percentage_24h ?? 0;
             bValue = b.price_change_percentage_24h ?? 0;
             break;
-          case 'volume':
+          case "volume":
             aValue = a.total_volume;
             bValue = b.total_volume;
             break;
-          case 'marketCap':
-          case 'market_cap':
+          case "marketCap":
+          case "market_cap":
             aValue = a.market_cap;
             bValue = b.market_cap;
             break;
@@ -69,7 +78,7 @@ export const handlers = [
             bValue = b.market_cap;
         }
 
-        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
       });
     }
 

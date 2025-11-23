@@ -47,6 +47,45 @@ export default function CoinListTableContent({ filteredCoins, hasNextPage, table
 
   const { rows } = table.getRowModel();
 
+  if (filteredCoins.length === 0) {
+    return (
+      <div ref={tableContainerRef} className="overflow-auto h-full align-top">
+        <table className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
+          <thead className="sticky top-0 bg-white z-10">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="border-b">
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <th
+                      key={header.id}
+                      className={`px-4 py-3 font-semibold ${header.column.id === "favorite" || header.column.id === "coin" ? "text-left" : "text-right"}`}
+                      onClick={header.column.getToggleSortingHandler()}
+                      style={{ width: `${header.column.getSize()}%` }}
+                    >
+                      <div className={`flex items-center gap-1 ${header.column.id === "favorite" || header.column.id === "coin" ? "justify-start" : "justify-end"}`}>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </div>
+                    </th>
+                  );
+                })}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            <tr>
+              <td colSpan={table.getAllColumns().length} className="px-4 py-20 text-center text-gray-500">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-lg font-medium">No coins found</div>
+                  <div className="text-sm">{params.activeTab === "favorites" ? "Add some coins to your favorites to see them here" : "Try adjusting your search query"}</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   return (
     <div ref={tableContainerRef} className="overflow-auto h-full align-top">
       <table className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
