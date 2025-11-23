@@ -7,13 +7,18 @@ import CoinListSkeletonScreen from "./CoinListSkeletonScreen";
 import CoinListErrorScreen from "./CoinListErrorScreen";
 import CoinListTableContent from "./CoinListTableContent";
 import CoinListFooterMeta from "./CoinListFooterMeta";
+import { GetCoinsResponse } from "../api/getCoins";
 
-export default function CoinListScreen() {
+interface CoinListScreenProps {
+  initialData: GetCoinsResponse;
+}
+
+export default function CoinListScreen({ initialData }: CoinListScreenProps) {
   const params = useCoinListParams();
-  const { data, coins: filteredCoins, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useCoinQuery(params);
+  const { data, coins: filteredCoins, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useCoinQuery(params, initialData);
   const { tableContainerRef, rowVirtualizer } = useCoinVirtualizer(filteredCoins, hasNextPage, isFetchingNextPage, fetchNextPage);
 
-  if (isLoading) return <CoinListSkeletonScreen params={params} />;
+  if (isLoading) return <CoinListSkeletonScreen />;
   if (error) return <CoinListErrorScreen />;
 
   return (
