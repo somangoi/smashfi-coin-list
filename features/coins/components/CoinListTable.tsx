@@ -1,51 +1,22 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { getCoins } from "../api/getCoins";
 import FavoriteButton from "@/features/favorites/components/FavoriteButton";
 import TabNavigation from "@/features/favorites/components/TabNavigation";
 import SearchBar from "@/shared/components/SearchBar";
 import CoinListTableSkeleton from "./CoinListTableSkeleton";
-import { useFilteredCoins } from "../lib/useFilteredCoins";
 import { useCoinListParams } from "../model/useCoinListParams";
+import { useCoinQuery } from "../model/useCoinQuery";
 import { SortKey } from "../types/sort";
 
-const ITEMS_PER_PAGE = 50;
-
 export default function CoinListTable() {
-  const { activeTab, setActiveTab, searchQuery, setSearchQuery, sortKey, sortDirection, handleSort } = useCoinListParams();
+  const params = useCoinListParams();
+  const { activeTab, setActiveTab, searchQuery, setSearchQuery, sortKey, sortDirection, handleSort } = params;
+
+  const { data, coins: filteredCoins, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useCoinQuery(params);
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
-
-  // 서버사이드 정렬 키 생성
-  const sortParam = sortKey ? `${sortKey}_${sortDirection}` : undefined;
-
-  // useInfiniteQuery로 서버사이드 페이지네이션 구현
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteQuery({
-    queryKey: ["coins", searchQuery, sortParam, activeTab],
-    queryFn: ({ pageParam = 1 }) =>
-      getCoins({
-        query: searchQuery,
-        sort: sortParam,
-        page: pageParam,
-        limit: ITEMS_PER_PAGE,
-      }),
-    getNextPageParam: (lastPage) => {
-      return lastPage.meta.hasNext ? lastPage.meta.page + 1 : undefined;
-    },
-    initialPageParam: 1,
-  });
-
-  // 모든 페이지의 코인 데이터를 하나의 배열로 합치기
-  const allCoins = useMemo(() => {
-    if (!data) return [];
-    return data.pages.flatMap((page) => page.data);
-  }, [data]);
-
-  // 즐겨찾기 탭 필터링
-  const filteredCoins = useFilteredCoins(allCoins, activeTab);
 
   // 가상 리스트 설정
   const rowVirtualizer = useVirtualizer({
