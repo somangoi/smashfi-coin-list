@@ -1,7 +1,7 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { getCoins } from "../api/getCoins";
 import FavoriteButton from "@/features/favorites/components/FavoriteButton";
@@ -9,17 +9,13 @@ import TabNavigation from "@/features/favorites/components/TabNavigation";
 import SearchBar from "@/shared/components/SearchBar";
 import CoinListTableSkeleton from "./CoinListTableSkeleton";
 import { useFilteredCoins } from "../lib/useFilteredCoins";
-
-type SortKey = "price" | "change" | "volume" | "marketCap";
-type SortDirection = "asc" | "desc";
+import { useCoinListParams } from "../model/useCoinListParams";
+import { SortKey } from "../types/sort";
 
 const ITEMS_PER_PAGE = 50;
 
 export default function CoinListTable() {
-  const [activeTab, setActiveTab] = useState<"all" | "favorites">("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const { activeTab, setActiveTab, searchQuery, setSearchQuery, sortKey, sortDirection, handleSort } = useCoinListParams();
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
@@ -50,15 +46,6 @@ export default function CoinListTable() {
 
   // 즐겨찾기 탭 필터링
   const filteredCoins = useFilteredCoins(allCoins, activeTab);
-
-  const handleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
-      setSortDirection("desc");
-    }
-  };
 
   // 가상 리스트 설정
   const rowVirtualizer = useVirtualizer({
