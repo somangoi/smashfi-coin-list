@@ -53,6 +53,22 @@ npm run build
 npm start
 ```
 
+### 목 데이터 생성
+
+프로젝트는 CoinGecko API를 사용하여 목 데이터를 생성합니다.
+
+```bash
+npm run fetch-mock-data
+```
+
+이 명령어는 CoinGecko API에서 최대 1000개의 암호화폐 데이터를 가져와 `data/mock_coins.json` 파일로 저장합니다.
+
+**참고사항:**
+
+- CoinGecko 무료 API는 분당 10-50 요청으로 제한됩니다
+- 스크립트는 rate limit을 방지하기 위해 각 페이지 요청 사이에 2초 딜레이를 둡니다
+- 생성된 목 데이터는 `app/api/coins/route.ts`에서 사용됩니다
+
 ## 프로젝트 구조
 
 ```
@@ -73,7 +89,9 @@ smashfi-coin-list/
 │       ├── components/
 │       └── stores/
 ├── shared/                 # 공유 컴포넌트
-└── data/                   # Mock 데이터
+├── data/                   # Mock 데이터 (CoinGecko API로 생성)
+└── scripts/                # 유틸리티 스크립트
+    └── fetchMockData.ts    # CoinGecko API 데이터 페칭 스크립트
 ```
 
 ## 주요 기능 구현
@@ -132,7 +150,29 @@ export async function GET(request: NextRequest) {
 
 - Next.js API Routes로 백엔드 구현
 - 개발/프로덕션 환경에서 동일한 코드 사용
-- 현재는 mock 데이터 사용
+- 현재는 `data/mock_coins.json` 파일에서 데이터를 읽어옴
+
+### 5. 데이터 구조 및 흐름
+
+프로젝트는 CoinGecko API를 사용하여 목 데이터를 생성하고, 이를 JSON 파일로 저장하여 사용합니다.
+
+**데이터 흐름:**
+
+```
+CoinGecko API
+  ↓ (fetchMockData.ts 스크립트 실행)
+data/mock_coins.json
+  ↓ (API Route에서 읽기)
+app/api/coins/route.ts
+  ↓ (필터링, 정렬, 페이지네이션 처리)
+Frontend (React Query)
+```
+
+**목 데이터 생성:**
+
+- `scripts/fetchMockData.ts`: CoinGecko API에서 데이터를 가져와 JSON 파일로 저장
+- 기본적으로 최대 1000개의 코인 데이터를 페칭 (페이지당 250개, 총 4페이지)
+- Rate limit 방지를 위해 요청 간 2초 딜레이 적용
 
 ## 성능 최적화
 
@@ -171,9 +211,10 @@ export async function GET(request: NextRequest) {
 ### 구현하지 못한 부분
 
 - **실시간 데이터 연동**
-  - 현재는 mock 데이터 사용
-  - CoinGecko, Binance 등 실제 암호화폐 API 연동 필요
+  - 현재는 정적 JSON 파일을 사용 (스크립트로 수동 갱신 필요)
+  - CoinGecko API를 런타임에 직접 호출하도록 변경 필요
   - WebSocket을 통한 실시간 가격 업데이트
+  - 자동 데이터 갱신 메커니즘 (예: cron job, scheduled tasks)
 
 ### 보완하고 싶은 점
 
